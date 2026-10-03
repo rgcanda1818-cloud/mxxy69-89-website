@@ -336,10 +336,12 @@
               <p class="login-status" id="auth-status" role="status" aria-live="polite"></p>
               <button class="login-mode-toggle" id="auth-mode-toggle" type="button">Create an account</button>
             </form>
-            <p class="login-demo-note">Demo storefront account. Your password is hashed and stored by this local server.</p>
+            <p class="login-demo-note">GitHub Pages sign-in uses Firebase Authentication. Store profile and order features still need the Python API.</p>
           </div>
         </section>
       </div>
-      <script src="script.js?v=4"></script>
+      <script src="firebase-config.js"></script>
+      <script type="module" src="firebase-auth.js"></script>
+      <script src="script.js?v=5"></script>
   </body>
 </html>

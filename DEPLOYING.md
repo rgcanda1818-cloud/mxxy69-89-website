@@ -1,21 +1,19 @@
-# Deploying Northgate on Render
+# Free GitHub Pages sign-in setup
 
-Northgate is prepared to run as a Render web service backed by Render PostgreSQL. The local launcher and SQLite database remain available for development; setting `DATABASE_URL` switches the server to PostgreSQL.
+GitHub Pages only hosts static files; it cannot run `server.py` or the local SQLite database. Northgate can use Firebase Authentication for free-tier email/password sign-up and sign-in while the site remains on GitHub Pages. This setup covers authentication only.
 
-## First deployment
+## Configure Firebase Authentication
 
-1. Put this project in a GitHub repository. Do not upload `.venv`, `__pycache__`, local database files, passwords, or environment-variable files.
-2. In Render, create a Blueprint from that repository and select `render.yaml`.
-3. Review the web-service and PostgreSQL plans and their costs before confirming. The Blueprint provisions paid resources.
-4. Wait for the service's `/api/health` check to pass, then open the `onrender.com` URL shown in Render.
-5. Create your own account on the hosted site. Promote it from the Render service shell with `python server.py --promote-admin you@example.com`.
+1. Create a Firebase project and keep it on the no-cost Spark plan. Do not enable billing or upgrade the project. Check Firebase's current limits before relying on the service; free-tier quotas and availability can change.
+2. In Firebase Console, open **Authentication → Sign-in method** and enable **Email/Password**.
+3. In **Project settings → General**, register a Web app if one is not already registered. Copy its web app config values into `firebase-config.js`, replacing all `YOUR_...` placeholders. The Firebase web config is public client configuration, not a password or service-account secret; never put a service-account key or other private credential in this file.
+4. In **Authentication → Settings → Authorized domains**, add the GitHub Pages hostname, such as `yourname.github.io`. If you use a custom domain, add that hostname too.
+5. Push the site to GitHub and enable GitHub Pages for the repository in **Settings → Pages**. Open the published HTTPS site and test creating an account, signing out, and signing in again.
 
-The Blueprint keeps the web service and database in the same region, gives the database a private connection, and does not configure a public database address. Render terminates HTTPS; the app continues to bind to the port Render provides.
+The Firebase project values are not included here because each project has its own config. Until you replace the placeholders, the site shows a setup message instead of pretending sign-in succeeded. Existing accounts in the local SQLite database are not copied to Firebase; create new hosted accounts.
 
-## Traffic and data notes
+## What remains local-only
 
-The server handles requests concurrently up to `NORTHGATE_MAX_CONCURRENT_REQUESTS` (64 by default). Beyond that limit, it returns `503 Service Unavailable` with `Retry-After` rather than creating unlimited worker threads. PostgreSQL allows the app to be scaled to multiple web instances without depending on per-instance files. Begin with one instance, load-test realistic traffic, then increase the web-service instance count in Render as needed. Autoscaling availability depends on your Render workspace plan.
+Firebase Authentication stores and checks account credentials. It does not host the Northgate Python API. Profile edits, saved addresses, order history, checkout order creation, and admin order management still call `/api/...` endpoints and will not work from GitHub Pages until a separate backend is deployed and connected. The cart itself is stored in the browser.
 
-This is still a demo storefront, not a production commerce system. Do not collect real customer details, reuse real passwords, or accept payments. The site has no payment provider, order email service, operational on-call monitoring, or verified load-test capacity. A health check confirms that the app can query its database; it does not guarantee uptime or a particular traffic capacity.
-
-The local SQLite database is not automatically uploaded or copied to Render PostgreSQL. Only create hosted demo accounts after deployment. Back up the Render database using Render's supported backup features before making operational changes.
+The existing `render.yaml` provisions paid Render resources. Do not use that Blueprint if you need to avoid charges. No Firebase database or paid service is required for the authentication-only setup described above.
