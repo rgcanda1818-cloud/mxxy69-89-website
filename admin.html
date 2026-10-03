@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Northgate | Admin orders</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css?v=2" />
+  </head>
+  <body class="account-page-body admin-page-body">
+    <main class="account-page-shell admin-page-shell">
+      <section class="account-page-main">
+        <header class="account-page-header">
+          <div>
+            <p class="eyebrow">NORTHGATE ADMIN</p>
+            <h1>Order management</h1>
+            <p>Review demo orders and update their fulfillment status.</p>
+          </div>
+          <nav class="admin-page-nav" aria-label="Admin navigation">
+            <a class="secondary-btn" href="account.html">My account</a>
+            <button id="admin-signout" class="account-signout-btn" type="button">Sign out</button>
+          </nav>
+        </header>
+        <section id="admin-orders" class="account-purchases" aria-label="All store orders" aria-live="polite">
+          <div class="account-state account-state-loading" role="status">Loading orders...</div>
+        </section>
+        <p id="admin-access-message" class="account-state account-state-error" role="alert" hidden></p>
+      </section>
+    </main>
+    <script src="script.js?v=4"></script>
+  </body>
+</html>
