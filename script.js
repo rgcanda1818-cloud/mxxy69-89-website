@@ -26,6 +26,19 @@ function firebaseAccount(user) {
   };
 }
 
+async function signOutCurrentAccount() {
+  if (accountAuthMode === 'firebase') {
+    const hostedAuth = window.northgateFirebaseAuth;
+    if (!hostedAuth) {
+      throw new Error('Firebase sign-out could not load. Refresh the page and try again.');
+    }
+    await hostedAuth.signOut();
+    return;
+  }
+
+  await apiRequest('/api/logout', { method: 'POST' });
+}
+
 async function apiRequest(path, options = {}) {
   const headers = { Accept: 'application/json', ...options.headers };
   const requestOptions = { ...options, credentials: 'same-origin', headers };
@@ -584,11 +597,7 @@ async function initializeAdminPage() {
   signoutButton?.addEventListener('click', async () => {
     signoutButton.disabled = true;
     try {
-      if (accountAuthMode === 'firebase') {
-        await window.northgateFirebaseAuth.signOut();
-      } else {
-        await apiRequest('/api/logout', { method: 'POST' });
-      }
+      await signOutCurrentAccount();
       currentAccount = null;
       window.location.href = 'index.html';
     } catch (error) {
@@ -700,7 +709,7 @@ async function initializeAccountPage() {
   signoutButton?.addEventListener('click', async () => {
     signoutButton.disabled = true;
     try {
-      await apiRequest('/api/logout', { method: 'POST' });
+      await signOutCurrentAccount();
       currentAccount = null;
       window.location.href = 'index.html';
     } catch (error) {
@@ -2183,15 +2192,23 @@ document.addEventListener('DOMContentLoaded', async () => {
       else document.getElementById('login-email').focus();
     });
 
-    signoutButton.addEventListener('click', () => {
-      localStorage.removeItem(DEMO_ACCOUNT_KEY);
-      updateAccountHeader();
-      signoutButton.hidden = true;
-      modeToggle.hidden = false;
-      setRegistrationMode(false);
-      if (accountDetailsPanel) accountDetailsPanel.hidden = true;
-      loginForm.hidden = false;
-      status.textContent = 'You are signed out of the demo account.';
+    signoutButton.addEventListener('click', async () => {
+      signoutButton.disabled = true;
+      try {
+        await signOutCurrentAccount();
+        currentAccount = null;
+        updateAccountHeader();
+        signoutButton.hidden = true;
+        modeToggle.hidden = false;
+        setRegistrationMode(false);
+        if (accountDetailsPanel) accountDetailsPanel.hidden = true;
+        loginForm.hidden = false;
+        status.textContent = 'You are signed out.';
+      } catch (error) {
+        status.textContent = error.message;
+      } finally {
+        signoutButton.disabled = false;
+      }
     });
 
     loginModal.querySelector('.login-close').addEventListener('click', closeLoginModal);
